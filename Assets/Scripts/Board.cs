@@ -20,6 +20,8 @@ public class Board : MonoBehaviour
     public Mesh queenMesh;
     public Mesh KingMesh;
 
+    private Piece selectedPiece = null;
+
     void Awake()
     {
     }
@@ -40,7 +42,14 @@ public class Board : MonoBehaviour
                 float z = bounds.bounds.center.z - bounds.bounds.extents.z + bounds.bounds.extents.z * 2f * (j / 8f) + bounds.bounds.extents.z / 8f;
 
                 Vector3 position = new Vector3(x, y, z);
-                Piece piece = Instantiate(piecePrefab, position, Quaternion.Euler(-90f, 0, 0f));
+                Piece piece = Instantiate(piecePrefab, position, Quaternion.identity, transform);
+                piece.Setup(() => {
+
+                }, () => {
+                    if (selectedPiece != null) selectedPiece.SetState(Piece.SelectedStates.DESELECTED);
+                    selectedPiece = piece;
+                    piece.SetState(Piece.SelectedStates.SELECTED);
+                });
                 SetupPiece(piece, pieceState.playerType, pieceState.pieceType);
                 pieces[i * 8 + j] = piece;
             }
@@ -50,7 +59,18 @@ public class Board : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (selectedPiece == null) return;
+
+        if(Input.GetMouseButton(0)) {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (!Physics.Raycast(ray, out hit, LayerMask.GetMask("Piece"))) {
+                selectedPiece.SetState(Piece.SelectedStates.DESELECTED);
+                selectedPiece = null;
+                // Do something with the object that was hit by the raycast.
+            }
+        }
     }
 
     void SetupPiece(Piece piece, Piece.PlayerTypes playerType, Piece.PieceTypes pieceType) {
@@ -81,9 +101,12 @@ public class Board : MonoBehaviour
                 break;
         }
 
-        piece.transform.Rotate(Vector3.forward, playerType == Piece.PlayerTypes.BLACK ? 90f : -90f);
+        piece.transform.Rotate(Vector3.up, playerType == Piece.PlayerTypes.BLACK ? 90f : -90f);
 
         piece.GetComponent<MeshFilter>().mesh = mesh;
+        BoxCollider bColl = piece.GetComponent<BoxCollider>();
+        bColl.size = mesh.bounds.size;
+        bColl.center = mesh.bounds.center;
 
         piece.playerType = playerType;
         piece.pieceType = pieceType;
