@@ -41,12 +41,13 @@ public class Piece : MonoBehaviour
     private Animator anim;
     private Material material;
     private Material highlightMaterial;
+    private MaterialPropertyBlock block;
 
-    public void Setup(Material highlightMaterial) {
+    public void Setup() {
         meshRenderer = GetComponentInChildren<MeshRenderer>();
-        material = meshRenderer.material;
         anim = GetComponentInChildren<Animator>();
-        this.highlightMaterial = Instantiate(highlightMaterial);
+
+        block = new MaterialPropertyBlock();
     }
 
     public void SetSelected(bool value) {
@@ -56,18 +57,23 @@ public class Piece : MonoBehaviour
     public void SetState(SelectedStates selectedState) {
         this.selectedState = selectedState;
 
+        meshRenderer.GetPropertyBlock(block);
+
         switch(selectedState) {
             case SelectedStates.SELECTED:
-                highlightMaterial.SetColor("_Color", Constants.selectedColor);
+                block.SetColor("_Color", Constants.selectedColor);
                 break;
             case SelectedStates.ENEMY:
-                highlightMaterial.SetColor("_Color", Constants.hostileColor);
+                block.SetColor("_Color", Constants.hostileColor);
                 break;
             default:
+                block.SetColor("_Color", Constants.defaultColor);
                 break;
         }
 
-        meshRenderer.material = selectedState == SelectedStates.DESELECTED ? material : highlightMaterial;
+
+        meshRenderer.SetPropertyBlock(block);
+        //meshRenderer.material = selectedState == SelectedStates.DESELECTED ? material : highlightMaterial;
     }
 
     public void Move(Vector3 destination, float time) {

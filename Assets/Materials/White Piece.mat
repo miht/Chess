@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Glow
+  m_Name: White Piece
   m_Shader: {fileID: -6465566751694194690, guid: a5031a87f56d1964d979ce447b32f5eb,
     type: 3}
   m_ShaderKeywords: _ALPHABLEND_ON _EMISSION
@@ -65,6 +65,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - Vector1_697F5613: 0
     - _BlendOp: 0
     - _BumpScale: 1
     - _CameraFadingEnabled: 0
@@ -89,6 +90,7 @@ Material:
     - _Mode: 2
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _Radius: -1
     - _SmoothnessTextureChannel: 0
     - _SoftParticlesEnabled: 0
     - _SoftParticlesFarFadeDistance: 1
@@ -100,6 +102,7 @@ Material:
     m_Colors:
     - Color_4F99439: {r: 0, g: 0, b: 0, a: 0}
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
+    - _Center: {r: 0.10120002, g: -0.17, b: 0.741, a: 0}
     - _Color: {r: 0, g: 0, b: 1, a: 1}
     - _ColorAddSubDiff: {r: -1, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 5.992157, g: 2.0705884, b: 1.3490196, a: 1}

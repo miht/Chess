@@ -17,7 +17,6 @@ public class Board : MonoBehaviour
 
     public Material blackPieceMaterial;
     public Material whitePieceMaterial;
-    public Material pieceHighlightMaterial;
 
     public Mesh knightMesh;
     public Mesh towerMesh;
@@ -29,6 +28,7 @@ public class Board : MonoBehaviour
     public AnimationCurve pieceMovementCurve;
 
     private Tile selectedTile = null;
+    public Material glowMaterial;
 
     void Awake()
     {
@@ -66,6 +66,7 @@ public class Board : MonoBehaviour
         }
         player.Piece = null;
         opponent.Piece = playerPiece;
+        StartCoroutine(Sonar(3f, -1f, selectedTile.transform.position, 1f));
 
         selectedTile = null;
         foreach (Tile t2 in tiles)
@@ -95,6 +96,7 @@ public class Board : MonoBehaviour
                             break;
                         default:
                             SelectTile(t);
+                            StartCoroutine(Sonar(-1, 3f, t.transform.position, 1f));
                             break;
                     }
                 }
@@ -107,14 +109,42 @@ public class Board : MonoBehaviour
                     }
 
                     SelectTile(t);
+                    StartCoroutine(Sonar(-1f, 3f, t.transform.position, 1f));
 
                 }
             } else {
-                selectedTile = null;
-                foreach (Tile t2 in tiles)
-                    t2.SetHighlighted(Tile.TileModes.DEFAULT);
+                if(selectedTile != null) {
+                    StartCoroutine(Sonar(3f, -1f, selectedTile.transform.position, 1f));
+                    selectedTile = null;
+                    foreach (Tile t2 in tiles)
+                        t2.SetHighlighted(Tile.TileModes.DEFAULT);
+                }
             }
         }
+    }
+
+    IEnumerator Sonar(float startRadius, float endRadius, Vector3 position, float time) {
+        float elapsedTime = 0;
+        whitePieceMaterial.SetVector("_Center", position);
+        blackPieceMaterial.SetVector("_Center", position);
+
+        whitePieceMaterial.SetFloat("_Radius", startRadius);
+        blackPieceMaterial.SetFloat("_Radius", startRadius);
+        float currentVal = startRadius;
+        while (elapsedTime < time) {
+            whitePieceMaterial.SetFloat("_Radius", Mathf.Lerp(startRadius, endRadius, (elapsedTime / time)));
+            blackPieceMaterial.SetFloat("_Radius", Mathf.Lerp(startRadius, endRadius, (elapsedTime / time)));
+            elapsedTime += Time.deltaTime;
+
+            // Yield here
+            yield return null;
+        }
+        // Make sure we got there
+        whitePieceMaterial.SetFloat("_Radius", endRadius);
+        blackPieceMaterial.SetFloat("_Radius", endRadius);
+
+        //anim.SetBool("moving", false);
+        yield return null;
     }
 
     void SelectTile(Tile tile) {
@@ -138,6 +168,7 @@ public class Board : MonoBehaviour
             tile.SetHighlighted(Tile.TileModes.SELECTED);
         }
         else {
+            //Play sonar inverse shader
             selectedTile = null;
             foreach (Tile t2 in tiles)
                 t2.SetHighlighted(Tile.TileModes.DEFAULT);
@@ -179,7 +210,7 @@ public class Board : MonoBehaviour
             default:
                 break;
         }
-        piece.Setup(pieceHighlightMaterial);
+        piece.Setup();
 
         piece.movementCurve = pieceMovementCurve;
 

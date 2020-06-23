@@ -25,12 +25,11 @@ public class Tile : MonoBehaviour
     }
     private TileModes prevTileMode = TileModes.DEFAULT;
 
-    public Material selectedMaterial, takeableMaterial, hostileMaterial;
     private MeshRenderer glowMeshRenderer;
     private ParticleSystem particleSystem;
     private ParticleSystem.MainModule mainParticleModule;
 
-    private Material highlightMaterial;
+    private MaterialPropertyBlock block;
 
     public string Name {
         get {
@@ -80,19 +79,20 @@ public class Tile : MonoBehaviour
         switch(tileMode) {
             case TileModes.HOSTILE:
                 //mainParticleModule.startColor = Color.red;
-                highlightMaterial.SetColor("_Color", Constants.hostileColor);
+                block.SetColor("_Color", Constants.hostileColor);
                 pieceState = Piece.SelectedStates.ENEMY;
                 break;
             case TileModes.DEFAULT:
                 pieceState = Piece.SelectedStates.DESELECTED;
+                block.SetColor("_Color", Constants.defaultColor);
                 break;
             case TileModes.SELECTED:
                 //mainParticleModule.startColor = Color.blue;
-                highlightMaterial.SetColor("_Color", Constants.selectedColor);
+                block.SetColor("_Color", Constants.selectedColor);
                 pieceState = Piece.SelectedStates.SELECTED;
                 break;
             case TileModes.TAKEABLE:
-                highlightMaterial.SetColor("_Color", Constants.takeableColor);
+                block.SetColor("_Color", Constants.takeableColor);
                 //mainParticleModule.startColor = Color.green;
                 pieceState = Piece.SelectedStates.TAKEABLE;
                 break;
@@ -100,7 +100,9 @@ public class Tile : MonoBehaviour
                 break;
         }
 
-        glowMeshRenderer.enabled = tileMode != TileModes.DEFAULT;
+        glowMeshRenderer.SetPropertyBlock(block);
+        //glowMeshRenderer.enabled = tileMode != TileModes.DEFAULT;
+        
 
         //if(tileMode != TileModes.DEFAULT) {
         //    particleSystem.Play();
@@ -114,8 +116,8 @@ public class Tile : MonoBehaviour
     }
 
     void Awake() {
-        glowMeshRenderer = transform.Find("Glow").GetComponent<MeshRenderer>();
-        highlightMaterial = glowMeshRenderer.material;
+        glowMeshRenderer = GetComponent<MeshRenderer>();
+        block = new MaterialPropertyBlock();
         particleSystem = GetComponentInChildren<ParticleSystem>();
         mainParticleModule = particleSystem.main;
     }
