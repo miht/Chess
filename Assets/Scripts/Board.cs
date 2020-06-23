@@ -96,7 +96,7 @@ public class Board : MonoBehaviour
                             break;
                         default:
                             SelectTile(t);
-                            StartCoroutine(Sonar(-1, 3f, t.transform.position, 1f));
+                            StartCoroutine(Sonar(0.05f, 3f, t.transform.position, 1f));
                             break;
                     }
                 }
@@ -109,12 +109,13 @@ public class Board : MonoBehaviour
                     }
 
                     SelectTile(t);
-                    StartCoroutine(Sonar(-1f, 3f, t.transform.position, 1f));
+                    StartCoroutine(Sonar(0.05f, 3f, t.transform.position, 1f));
 
                 }
             } else {
                 if(selectedTile != null) {
-                    StartCoroutine(Sonar(3f, -1f, selectedTile.transform.position, 1f));
+                    whitePieceMaterial.SetFloat("_Radius", -1f);
+                    blackPieceMaterial.SetFloat("_Radius", -1f);
                     selectedTile = null;
                     foreach (Tile t2 in tiles)
                         t2.SetHighlighted(Tile.TileModes.DEFAULT);

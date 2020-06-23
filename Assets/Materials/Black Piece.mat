@@ -102,7 +102,7 @@ Material:
     m_Colors:
     - Color_4F99439: {r: 0, g: 0, b: 0, a: 0}
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
-    - _Center: {r: 0.10120002, g: -0.17, b: 0.741, a: 0}
+    - _Center: {r: -0.09879997, g: -0.17, b: -0.058999956, a: 0}
     - _Color: {r: 0, g: 0, b: 1, a: 1}
     - _ColorAddSubDiff: {r: -1, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 5.992157, g: 2.0705884, b: 1.3490196, a: 1}

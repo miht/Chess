@@ -15,7 +15,7 @@ public class PieceHolder : MonoBehaviour
         if (index >= slots.Length) return;
 
         piece.transform.SetParent(slots[index]);
-        piece.Move(slots[index].position, 2f);
+        piece.Move(slots[index].position, 1f);
         piece.SetState(Piece.SelectedStates.DESELECTED);
         index++;
     }

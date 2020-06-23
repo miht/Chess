@@ -85,17 +85,15 @@ public class Piece : MonoBehaviour
         Vector3 currentPos = transform.position;
         anim.SetBool("moving", true);
         while (elapsedTime < time) {
-            transform.position = Vector3.Lerp(currentPos, destination, movementCurve.Evaluate((elapsedTime / time)));
+            //transform.position = Vector3.Lerp(currentPos, destination, movementCurve.Evaluate((elapsedTime / time)));
             elapsedTime += Time.deltaTime;
-            if (elapsedTime / time >= 0.75f)
-                anim.SetBool("moving", false);
 
             // Yield here
             yield return null;
         }
         // Make sure we got there
         transform.position = destination;
-        //anim.SetBool("moving", false);
+        anim.SetBool("moving", false);
         yield return null;
     }
 
