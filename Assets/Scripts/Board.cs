@@ -6,12 +6,18 @@ using UnityEngine.UIElements;
 public class Board : MonoBehaviour
 {
     public MeshRenderer bounds;
-    public Piece piecePrefab;
+    public GameObject piecePrefab;
+
+    public PieceHolder blackPieceHolder;
+    public PieceHolder whitePieceHolder;
+
     public Piece[] pieces = new Piece[64];
+    public Tile[] tiles = new Tile[64];
     public BoardState boardState;
 
     public Material blackPieceMaterial;
     public Material whitePieceMaterial;
+    public Material pieceHighlightMaterial;
 
     public Mesh knightMesh;
     public Mesh towerMesh;
@@ -20,7 +26,9 @@ public class Board : MonoBehaviour
     public Mesh queenMesh;
     public Mesh KingMesh;
 
-    private Piece selectedPiece = null;
+    public AnimationCurve pieceMovementCurve;
+
+    private Tile selectedTile = null;
 
     void Awake()
     {
@@ -29,6 +37,7 @@ public class Board : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        tiles = GetComponentsInChildren<Tile>();
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
@@ -36,79 +45,153 @@ public class Board : MonoBehaviour
                 PieceState pieceState =  boardState.GetPieceState(i * 8 + j);
                 if (pieceState.pieceType == Piece.PieceTypes.NONE) continue;
 
-                // Vector3 position = new Vector3(i * dimensions.x / 8, j * dimensions.z / 8);
-                float x = bounds.bounds.center.x - bounds.bounds.extents.x + bounds.bounds.extents.x * 2f * (i / 8f) + bounds.bounds.extents.x / 8f;
-                float y = bounds.bounds.max.y; 
-                float z = bounds.bounds.center.z - bounds.bounds.extents.z + bounds.bounds.extents.z * 2f * (j / 8f) + bounds.bounds.extents.z / 8f;
-
-                Vector3 position = new Vector3(x, y, z);
-                Piece piece = Instantiate(piecePrefab, position, Quaternion.identity, transform);
-                piece.Setup(() => {
-
-                }, () => {
-                    if (selectedPiece != null) selectedPiece.SetState(Piece.SelectedStates.DESELECTED);
-                    selectedPiece = piece;
-                    piece.SetState(Piece.SelectedStates.SELECTED);
-                });
-                SetupPiece(piece, pieceState.playerType, pieceState.pieceType);
+                Piece piece = GetPiece(pieceState.playerType, pieceState.pieceType);
+                tiles[i * 8 + j].piece = piece;
+                piece.transform.SetParent(tiles[i * 8 + j].transform, false);
                 pieces[i * 8 + j] = piece;
             }
         }
     }
 
+    void TakeTile(Tile player, Tile opponent) {
+        Piece playerPiece = player.Piece;
+        Piece opponentPiece = opponent.Piece;
+        if (opponentPiece) {
+            if(opponentPiece.playerType == Piece.PlayerTypes.BLACK) {
+                blackPieceHolder.AddPiece(opponentPiece);
+            }
+            else {
+                whitePieceHolder.AddPiece(opponentPiece);
+            }
+        }
+        player.Piece = null;
+        opponent.Piece = playerPiece;
+
+        selectedTile = null;
+        foreach (Tile t2 in tiles)
+            t2.SetHighlighted(Tile.TileModes.DEFAULT);
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if (selectedPiece == null) return;
-
-        if(Input.GetMouseButton(0)) {
+        if(Input.GetMouseButtonDown(0)) {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-            if (!Physics.Raycast(ray, out hit, LayerMask.GetMask("Piece"))) {
-                selectedPiece.SetState(Piece.SelectedStates.DESELECTED);
-                selectedPiece = null;
-                // Do something with the object that was hit by the raycast.
+            if (Physics.Raycast(ray, out hit, 99f, LayerMask.GetMask("Tile"))) {
+                Tile t = hit.transform.GetComponent<Tile>();
+                if(selectedTile) {
+                    switch(t.TileMode) {
+                        case Tile.TileModes.HOSTILE:
+                            //Take
+                            TakeTile(selectedTile, t);
+                            break;
+                        case Tile.TileModes.TAKEABLE:
+                            TakeTile(selectedTile, t);
+                            //Regular move
+                            break;
+                        case Tile.TileModes.SELECTED:
+                            break;
+                        default:
+                            SelectTile(t);
+                            break;
+                    }
+                }
+                else {
+                    if (!t.Piece) {
+                        foreach (Tile t2 in tiles)
+                            t2.SetHighlighted(Tile.TileModes.DEFAULT);
+                        selectedTile = null;
+                        return;
+                    }
+
+                    SelectTile(t);
+
+                }
+            } else {
+                selectedTile = null;
+                foreach (Tile t2 in tiles)
+                    t2.SetHighlighted(Tile.TileModes.DEFAULT);
             }
         }
     }
 
-    void SetupPiece(Piece piece, Piece.PlayerTypes playerType, Piece.PieceTypes pieceType) {
+    void SelectTile(Tile tile) {
+        if (tile.Piece) {
+            selectedTile = tile;
+            int[] tileStates = selectedTile.Piece.GetAvailableTiles(tiles);
+            for (int i = 0; i < tileStates.Length; i++) {
+                switch (tileStates[i]) {
+                    case 1:
+                        tiles[i].SetHighlighted(Tile.TileModes.TAKEABLE);
+                        break;
+                    case 2:
+                        Debug.Log(i);
+                        tiles[i].SetHighlighted(Tile.TileModes.HOSTILE);
+                        break;
+                    default:
+                        tiles[i].SetHighlighted(Tile.TileModes.DEFAULT);
+                        break;
+                }
+            }
+            tile.SetHighlighted(Tile.TileModes.SELECTED);
+        }
+        else {
+            selectedTile = null;
+            foreach (Tile t2 in tiles)
+                t2.SetHighlighted(Tile.TileModes.DEFAULT);
+        }
+        
+    }
 
-        piece.GetComponent<MeshRenderer>().material = playerType == Piece.PlayerTypes.BLACK ? blackPieceMaterial : whitePieceMaterial;
+    Piece GetPiece(Piece.PlayerTypes playerType, Piece.PieceTypes pieceType) {
+        GameObject go = Instantiate(piecePrefab).gameObject;
+        go.GetComponentInChildren<MeshRenderer>().material = playerType == Piece.PlayerTypes.BLACK ? blackPieceMaterial : whitePieceMaterial;
 
         Mesh mesh = null;
+        Piece piece = null;
         switch (pieceType) {
             case Piece.PieceTypes.TOWER:
                 mesh = towerMesh;
+                piece = go.AddComponent<Tower>();
                 break;
             case Piece.PieceTypes.KNIGHT:
                 mesh = knightMesh;
+                piece = go.AddComponent<Knight>();
                 break;
             case Piece.PieceTypes.BISHOP:
                 mesh = bishopMesh;
+                piece = go.AddComponent<Bishop>();
                 break;
             case Piece.PieceTypes.QUEEN:
                 mesh = queenMesh;
+                piece = go.AddComponent<Queen>();
                 break;
             case Piece.PieceTypes.KING:
                 mesh = KingMesh;
+                piece = go.AddComponent<King>();
                 break;
             case Piece.PieceTypes.PAWN:
                 mesh = pawnMesh;
+                piece = go.AddComponent<Pawn>();
                 break;
             default:
                 break;
         }
+        piece.Setup(pieceHighlightMaterial);
 
-        piece.transform.Rotate(Vector3.up, playerType == Piece.PlayerTypes.BLACK ? 90f : -90f);
+        piece.movementCurve = pieceMovementCurve;
 
-        piece.GetComponent<MeshFilter>().mesh = mesh;
-        BoxCollider bColl = piece.GetComponent<BoxCollider>();
-        bColl.size = mesh.bounds.size;
-        bColl.center = mesh.bounds.center;
+        go.transform.Rotate(Vector3.up, playerType == Piece.PlayerTypes.BLACK ? 0f: 180f);
+
+        go.GetComponentInChildren<MeshFilter>().mesh = mesh;
+        //BoxCollider bColl = go.GetComponent<BoxCollider>();
+        //bColl.size = mesh.bounds.size;
+        //bColl.center = mesh.bounds.center;
 
         piece.playerType = playerType;
         piece.pieceType = pieceType;
+        return piece;
     }
 }

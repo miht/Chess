@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 43d619f937eb3e647b8476f80995b809, type: 3}
-  m_Name: Default State
+  m_Name: Default State 1
   m_EditorClassIdentifier: 
   pieces:
   - pieceType: 2
@@ -56,7 +56,7 @@ MonoBehaviour:
   - pieceType: 0
     playerType: 0
   - pieceType: 0
-    playerType: 0
+    playerType: 1
   - pieceType: 0
     playerType: 0
   - pieceType: 0
@@ -65,7 +65,7 @@ MonoBehaviour:
     playerType: 0
   - pieceType: 0
     playerType: 0
-  - pieceType: 0
+  - pieceType: 1
     playerType: 0
   - pieceType: 0
     playerType: 0
@@ -141,3 +141,4 @@ MonoBehaviour:
     playerType: 1
   - pieceType: 2
     playerType: 1
+  turn: 0

@@ -6,6 +6,7 @@ using UnityEngine;
 public class BoardState : ScriptableObject
 {
     [SerializeField] private PieceState[] pieces = new PieceState[64];
+    [SerializeField] public int turn = 0;
 
     public PieceState GetPieceState(int index) {
         return pieces[index];

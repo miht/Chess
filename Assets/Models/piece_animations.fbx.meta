@@ -1,11 +1,20 @@
 fileFormatVersion: 2
-guid: 51839363b5446324d93c919be9dbfc31
+guid: e389505f6f5c2c947b566854b0a572e9
 ModelImporter:
   serializedVersion: 19301
   internalIDToNameTable:
   - first:
-      74: 8267310233285651131
-    second: Pawn|Pickup
+      74: -5601616619932291153
+    second: Cube|Pickup
+  - first:
+      74: 2131864205095655572
+    second: Cube|Idle
+  - first:
+      74: -6890161867430261708
+    second: Cube|Levitate
+  - first:
+      74: -822298776785679437
+    second: Cube|PutDown
   externalObjects: {}
   materials:
     materialImportMode: 1
@@ -34,7 +43,7 @@ ModelImporter:
     extraExposedTransformPaths: []
     extraUserProperties: []
     clipAnimations: []
-    isReadable: 1
+    isReadable: 0
   meshes:
     lODScreenPercentages: []
     globalScale: 1
@@ -93,7 +102,7 @@ ModelImporter:
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
-  avatarSetup: 0
+  avatarSetup: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
