@@ -57,8 +57,6 @@ public class Piece : MonoBehaviour
     public void SetState(SelectedStates selectedState) {
         this.selectedState = selectedState;
 
-        meshRenderer.GetPropertyBlock(block);
-
         switch(selectedState) {
             case SelectedStates.SELECTED:
                 block.SetColor("_Color", Constants.selectedColor);
@@ -81,19 +79,37 @@ public class Piece : MonoBehaviour
     }
 
     IEnumerator MoveToDestination(Vector3 destination, float time) {
+        float halfTime = time / 2f;
         float elapsedTime = 0;
         Vector3 currentPos = transform.position;
-        anim.SetBool("moving", true);
-        while (elapsedTime < time) {
-            //transform.position = Vector3.Lerp(currentPos, destination, movementCurve.Evaluate((elapsedTime / time)));
+        block.SetFloat("_Dissolve", 0f);
+        //anim.SetBool("moving", true);
+        while (elapsedTime < halfTime) {
+            //Dissolve
+            block.SetFloat("_Dissolve", elapsedTime / halfTime);
+            meshRenderer.SetPropertyBlock(block);
             elapsedTime += Time.deltaTime;
 
             // Yield here
             yield return null;
         }
+        transform.position = destination;
+        elapsedTime = 0f;
+        while (elapsedTime < halfTime) {
+            //Materialize
+            block.SetFloat("_Dissolve", 1 - (elapsedTime / halfTime));
+            meshRenderer.SetPropertyBlock(block);
+            elapsedTime += Time.deltaTime;
+
+            // Yield here
+            yield return null;
+        }
+        block.SetFloat("_Dissolve", 0f);
+        meshRenderer.SetPropertyBlock(block);
+
         // Make sure we got there
         transform.position = destination;
-        anim.SetBool("moving", false);
+        //anim.SetBool("moving", false);
         yield return null;
     }
 

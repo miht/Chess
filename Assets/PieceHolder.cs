@@ -16,7 +16,7 @@ public class PieceHolder : MonoBehaviour
 
         piece.transform.SetParent(slots[index]);
         piece.Move(slots[index].position, 1f);
-        piece.SetState(Piece.SelectedStates.DESELECTED);
+        //piece.SetState(Piece.SelectedStates.DESELECTED);
         index++;
     }
 }

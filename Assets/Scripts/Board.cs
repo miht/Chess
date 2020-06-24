@@ -54,9 +54,13 @@ public class Board : MonoBehaviour
     }
 
     void TakeTile(Tile player, Tile opponent) {
+        foreach (Tile t2 in tiles) 
+            t2.SetHighlighted(Tile.TileModes.DEFAULT);
+
         Piece playerPiece = player.Piece;
         Piece opponentPiece = opponent.Piece;
         if (opponentPiece) {
+            opponentPiece.SetState(Piece.SelectedStates.ENEMY);
             if(opponentPiece.playerType == Piece.PlayerTypes.BLACK) {
                 blackPieceHolder.AddPiece(opponentPiece);
             }
@@ -64,13 +68,13 @@ public class Board : MonoBehaviour
                 whitePieceHolder.AddPiece(opponentPiece);
             }
         }
+        
+        //StartCoroutine(Sonar(3f, -1f, selectedTile.transform.position, 1f));
+
         player.Piece = null;
         opponent.Piece = playerPiece;
-        StartCoroutine(Sonar(3f, -1f, selectedTile.transform.position, 1f));
-
+        playerPiece.SetState(Piece.SelectedStates.SELECTED);
         selectedTile = null;
-        foreach (Tile t2 in tiles)
-            t2.SetHighlighted(Tile.TileModes.DEFAULT);
     }
 
     // Update is called once per frame
