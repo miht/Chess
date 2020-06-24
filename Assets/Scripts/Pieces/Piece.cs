@@ -21,6 +21,8 @@ public class Piece : MonoBehaviour
     private MeshRenderer meshRenderer;
 
     private Outline outline;
+
+    private int moveCounter;
    
     
     public enum PlayerTypes {
@@ -42,6 +44,11 @@ public class Piece : MonoBehaviour
     private Material material;
     private Material highlightMaterial;
     private MaterialPropertyBlock block;
+
+    public int MoveNumber {
+        get { return moveCounter; }
+        set { moveCounter = value; }
+    }
 
     public void Setup() {
         meshRenderer = GetComponentInChildren<MeshRenderer>();

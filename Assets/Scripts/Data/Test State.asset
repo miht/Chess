@@ -79,8 +79,8 @@ MonoBehaviour:
     playerType: 0
   - pieceType: 0
     playerType: 0
-  - pieceType: 0
-    playerType: 0
+  - pieceType: 2
+    playerType: 1
   - pieceType: 0
     playerType: 0
   - pieceType: 0

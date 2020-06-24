@@ -5,8 +5,7 @@ using UnityEngine;
 public class Queen : Piece
 {
     public override int[] GetAvailableTiles(Tile[] state) {
-        int[] moves = new int[64];
-        int index = CalculateIndex();
+        int[] moves = TileUtilities.GetQueenTiles(CalculateIndex(), playerType, state);
 
         return moves;
     }

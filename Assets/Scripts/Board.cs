@@ -15,6 +15,8 @@ public class Board : MonoBehaviour
     public Tile[] tiles = new Tile[64];
     public BoardState boardState;
 
+    public Piece.PlayerTypes playerTurn = Piece.PlayerTypes.WHITE;
+
     public Material blackPieceMaterial;
     public Material whitePieceMaterial;
 
@@ -74,7 +76,17 @@ public class Board : MonoBehaviour
         player.Piece = null;
         opponent.Piece = playerPiece;
         playerPiece.SetState(Piece.SelectedStates.SELECTED);
+        playerPiece.MoveNumber++;
         selectedTile = null;
+        ChangeTurn();
+    }
+
+    void ChangeTurn() {
+        if(playerTurn == Piece.PlayerTypes.WHITE) {
+            playerTurn = Piece.PlayerTypes.BLACK;
+        } else {
+            playerTurn = Piece.PlayerTypes.WHITE;
+        }
     }
 
     // Update is called once per frame
@@ -99,8 +111,10 @@ public class Board : MonoBehaviour
                         case Tile.TileModes.SELECTED:
                             break;
                         default:
-                            SelectTile(t);
-                            StartCoroutine(Sonar(0.05f, 3f, t.transform.position, 1f));
+                            if (t.piece.playerType == playerTurn) {
+                                SelectTile(t);
+                                StartCoroutine(Sonar(0.05f, 3f, t.transform.position, 1f));
+                            }
                             break;
                     }
                 }
@@ -112,8 +126,10 @@ public class Board : MonoBehaviour
                         return;
                     }
 
-                    SelectTile(t);
-                    StartCoroutine(Sonar(0.05f, 3f, t.transform.position, 1f));
+                    if(t.piece.playerType == playerTurn) {
+                        SelectTile(t);
+                        StartCoroutine(Sonar(0.05f, 3f, t.transform.position, 1f));
+                    }
 
                 }
             } else {

@@ -18,16 +18,16 @@ public class Knight : Piece
             moves[index + 15] = isFree(index + 15) ? 1 : (isHostile(index + 15) ? 2 : 0);
         if (index % 8 <= 7 && index + 17 < 64) // OK
             moves[index + 17] = isFree(index + 17) ? 1 : (isHostile(index + 17) ? 2 : 0);
-        if (index % 8 < 7 && index + 10 < 64) // OK
+        if (index % 8 < 6 && index + 10 < 64) // OK
             moves[index + 10] = isFree(index + 10) ? 1 : (isHostile(index + 10) ? 2 : 0);
-        if (index % 8 < 7 && index - 6 >= 0) // OK
+        if (index % 8 < 6 && index - 6 >= 0) // OK
             moves[index - 6] = isFree(index - 6) ? 1 : (isHostile(index - 6) ? 2 : 0);
         if (index % 8 <= 6 && index - 15 >= 0) // OK
             moves[index - 15] = isFree(index - 15) ? 1 : (isHostile(index - 15) ? 2 : 0);
+        if (index % 8 > 0 && index - 17 >= 0) //OK
+            moves[index - 17] = isFree(index - 17) ? 1 : (isHostile(index - 17) ? 2 : 0);
         if (index % 8 > 1 && index - 10 >= 0) // OK
             moves[index - 10] = isFree(index - 10) ? 1 : (isHostile(index - 10) ? 2 : 0);
-        if (index % 8 > 1 && index - 17 >= 0) //OK
-            moves[index - 17] = isFree(index - 17) ? 1 : (isHostile(index - 17) ? 2 : 0);
         return moves;
     }
 }
