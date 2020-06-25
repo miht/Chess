@@ -86,15 +86,13 @@ public class Tile : MonoBehaviour
                 pieceState = Piece.SelectedStates.ENEMY;
                 break;
             case TileModes.DEFAULT:
-                mainParticleModule.startColor = Constants.defaultColor;
                 pieceState = Piece.SelectedStates.DESELECTED;
-                //particleBlock.SetColor("_Color", Constants.defaultColor);
+                mainParticleModule.startColor = Constants.defaultColor;
                 block.SetColor("_Color", Constants.defaultColor);
                 break;
             case TileModes.SELECTED:
                 //mainParticleModule.startColor = Color.blue;
                 mainParticleModule.startColor = Constants.selectedColor;
-                //particleBlock.SetColor("_Color", Constants.selectedColor);
                 block.SetColor("_Color", Constants.selectedColor);
                 pieceState = Piece.SelectedStates.SELECTED;
                 break;

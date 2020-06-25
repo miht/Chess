@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -30,6 +31,7 @@ public class Board : MonoBehaviour
     public AnimationCurve pieceMovementCurve;
 
     private Tile selectedTile = null;
+    private bool canSelect = true;
     public Material glowMaterial;
 
     void Awake()
@@ -56,9 +58,6 @@ public class Board : MonoBehaviour
     }
 
     void TakeTile(Tile player, Tile opponent) {
-        foreach (Tile t2 in tiles) 
-            t2.SetHighlighted(Tile.TileModes.DEFAULT);
-
         Piece playerPiece = player.Piece;
         Piece opponentPiece = opponent.Piece;
         if (opponentPiece) {
@@ -70,12 +69,17 @@ public class Board : MonoBehaviour
                 whitePieceHolder.AddPiece(opponentPiece);
             }
         }
-        
-        //StartCoroutine(Sonar(3f, -1f, selectedTile.transform.position, 1f));
+
+        StartCoroutine(Sonar(3f, -1f, opponent.transform.position, 1f, () => {
+            foreach (Tile t2 in tiles) {
+                if (t2.TileMode != Tile.TileModes.DEFAULT)
+                    t2.SetHighlighted(Tile.TileModes.DEFAULT);
+            }
+        }));
 
         player.Piece = null;
         opponent.Piece = playerPiece;
-        playerPiece.SetState(Piece.SelectedStates.SELECTED);
+        //playerPiece.SetState(Piece.SelectedStates.SELECTED);
         playerPiece.MoveNumber++;
         selectedTile = null;
         ChangeTurn();
@@ -98,53 +102,79 @@ public class Board : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit, 99f, LayerMask.GetMask("Tile"))) {
                 Tile t = hit.transform.GetComponent<Tile>();
-                if(selectedTile) {
-                    switch(t.TileMode) {
-                        case Tile.TileModes.HOSTILE:
-                            //Take
-                            TakeTile(selectedTile, t);
-                            break;
-                        case Tile.TileModes.TAKEABLE:
-                            TakeTile(selectedTile, t);
-                            //Regular move
-                            break;
-                        case Tile.TileModes.SELECTED:
-                            break;
-                        default:
-                            if (t.piece.playerType == playerTurn) {
-                                SelectTile(t);
-                                StartCoroutine(Sonar(0.05f, 3f, t.transform.position, 1f));
-                            }
-                            break;
-                    }
-                }
-                else {
-                    if (!t.Piece) {
-                        foreach (Tile t2 in tiles)
-                            t2.SetHighlighted(Tile.TileModes.DEFAULT);
-                        selectedTile = null;
-                        return;
-                    }
-
-                    if(t.piece.playerType == playerTurn) {
+                switch(t.TileMode) {
+                    case Tile.TileModes.HOSTILE:
+                        //Take
+                        TakeTile(selectedTile, t);
+                        break;
+                    case Tile.TileModes.TAKEABLE:
+                        TakeTile(selectedTile, t);
+                        //Regular move
+                        break;
+                    case Tile.TileModes.SELECTED:
+                        break;
+                    default:
                         SelectTile(t);
-                        StartCoroutine(Sonar(0.05f, 3f, t.transform.position, 1f));
-                    }
-
+                        break;
                 }
             } else {
-                if(selectedTile != null) {
-                    whitePieceMaterial.SetFloat("_Radius", -1f);
-                    blackPieceMaterial.SetFloat("_Radius", -1f);
-                    selectedTile = null;
-                    foreach (Tile t2 in tiles)
-                        t2.SetHighlighted(Tile.TileModes.DEFAULT);
-                }
+                SelectTile(null);
             }
         }
     }
+    void SelectTile(Tile tile) {
+        if (!canSelect)
+            return;
 
-    IEnumerator Sonar(float startRadius, float endRadius, Vector3 position, float time) {
+        if(tile) {
+            if (tile.Piece) {
+                if (tile.piece.playerType != playerTurn)
+                    return;
+
+                selectedTile = tile;
+                canSelect = false;
+                StartCoroutine(Sonar(0.05f, 2f, tile.transform.position, 1f, () => { canSelect = true; }));
+                int[] tileStates = selectedTile.Piece.GetAvailableTiles(tiles);
+                for (int i = 0; i < tileStates.Length; i++) {
+                    switch (tileStates[i]) {
+                        case 1:
+                            tiles[i].SetHighlighted(Tile.TileModes.TAKEABLE);
+                            break;
+                        case 2:
+                            tiles[i].SetHighlighted(Tile.TileModes.HOSTILE);
+                            break;
+                        default:
+                            tiles[i].SetHighlighted(Tile.TileModes.DEFAULT);
+                            break;
+                    }
+                }
+                tile.SetHighlighted(Tile.TileModes.SELECTED);
+            }
+            else {
+                StartCoroutine(Sonar(2f, 0f, tile.transform.position, 1f, () => {
+                    foreach (Tile t2 in tiles) {
+                        t2.SetHighlighted(Tile.TileModes.DEFAULT);
+                    }
+                }));
+                //Play sonar inverse shader
+                selectedTile = null;
+            }
+        }
+        else {
+            //Play sonar inverse shader
+            if (!selectedTile)
+                return;
+            StartCoroutine(Sonar(2f, 0f, selectedTile.transform.position, 1f, () => {
+                foreach (Tile t2 in tiles) {
+                    t2.SetHighlighted(Tile.TileModes.DEFAULT);
+                }
+            }));
+            selectedTile = null;
+        }
+
+    }
+
+    IEnumerator Sonar(float startRadius, float endRadius, Vector3 position, float time, Action onFinished = null) {
         float elapsedTime = 0;
         whitePieceMaterial.SetVector("_Center", position);
         blackPieceMaterial.SetVector("_Center", position);
@@ -164,38 +194,10 @@ public class Board : MonoBehaviour
         whitePieceMaterial.SetFloat("_Radius", endRadius);
         blackPieceMaterial.SetFloat("_Radius", endRadius);
 
-        //anim.SetBool("moving", false);
+        onFinished?.Invoke();
         yield return null;
     }
 
-    void SelectTile(Tile tile) {
-        if (tile.Piece) {
-            selectedTile = tile;
-            int[] tileStates = selectedTile.Piece.GetAvailableTiles(tiles);
-            for (int i = 0; i < tileStates.Length; i++) {
-                switch (tileStates[i]) {
-                    case 1:
-                        tiles[i].SetHighlighted(Tile.TileModes.TAKEABLE);
-                        break;
-                    case 2:
-                        Debug.Log(i);
-                        tiles[i].SetHighlighted(Tile.TileModes.HOSTILE);
-                        break;
-                    default:
-                        tiles[i].SetHighlighted(Tile.TileModes.DEFAULT);
-                        break;
-                }
-            }
-            tile.SetHighlighted(Tile.TileModes.SELECTED);
-        }
-        else {
-            //Play sonar inverse shader
-            selectedTile = null;
-            foreach (Tile t2 in tiles)
-                t2.SetHighlighted(Tile.TileModes.DEFAULT);
-        }
-        
-    }
 
     Piece GetPiece(Piece.PlayerTypes playerType, Piece.PieceTypes pieceType) {
         GameObject go = Instantiate(piecePrefab).gameObject;
