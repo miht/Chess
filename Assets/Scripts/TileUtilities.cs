@@ -17,21 +17,26 @@ public class TileUtilities {
         if (playerType == Piece.PlayerTypes.BLACK) {
             if (index % 8 > 0)
                 moves[index + (8 - 1)] = isOccupied(index + 7) ? 2 : 0;
-            if (index + 8 < 64)
-                moves[index + 8] = isFree(index + 8) ? 1 : 0;
+            if (index + 8 < 64) {
+                int frontPiece = isFree(index + 8) ? 1 : 0;
+                moves[index + 8] = frontPiece;
+                if (frontPiece == 1 && index + 16 < 64 && moveNumber == 0)
+                    moves[index + 16] = isFree(index + 16) ? 1 : 0;
+            }
             if (index % 8 < 7)
                 moves[index + (8 + 1)] = isOccupied(index + 9) ? 2 : 0;
-            if (index + 16 < 64 && moveNumber == 0)
-                moves[index + 16] = isFree(index + 16) ? 1 : 0;
         } else {
             if (index % 8 < 7)
                 moves[index - 7] = isOccupied(index - 7) ? 2 : 0;
-            if (index - 8 >= 0)
-                moves[index - 8] = isFree(index - 8) ? 1 : 0;
+            if (index - 8 >= 0) {
+                int frontPiece = isFree(index - 8) ? 1 : 0;
+                moves[index - 8] = frontPiece;
+                if (frontPiece == 1 && index - 16 >= 0 && moveNumber == 0)
+                    moves[index - 16] = isFree(index - 16) ? 1 : 0;
+            }
             if (index % 8 > 0)
                 moves[index - 9] = isOccupied(index - 9) ? 2 : 0;
-            if (index - 16 >= 0 && moveNumber == 0)
-                moves[index - 16] = isFree(index - 16) ? 1 : 0;
+
         }
 
         return moves;
