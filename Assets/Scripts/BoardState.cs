@@ -11,6 +11,10 @@ public class BoardState : ScriptableObject
     public PieceState GetPieceState(int index) {
         return pieces[index];
     }
+
+    public void SetPieceState(int index, PieceState value) {
+        pieces[index] = value;
+    }
 }
 
 [System.Serializable]

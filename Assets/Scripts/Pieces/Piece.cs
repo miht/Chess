@@ -76,21 +76,20 @@ public class Piece : MonoBehaviour
                 break;
         }
 
-
+        block.SetFloat("_IsActive", selectedState == SelectedStates.DESELECTED ? 0f : 1f);
         meshRenderer.SetPropertyBlock(block);
         //meshRenderer.material = selectedState == SelectedStates.DESELECTED ? material : highlightMaterial;
     }
 
-    public void Move(Vector3 destination, float time) {
-        StartCoroutine(MoveToDestination(destination, time));
+    public void Move(Vector3 destination, float time, Action onComplete = null) {
+        StartCoroutine(MoveToDestination(destination, time, onComplete));
     }
 
-    IEnumerator MoveToDestination(Vector3 destination, float time) {
+    IEnumerator MoveToDestination(Vector3 destination, float time, Action onComplete) {
         float halfTime = time / 2f;
         float elapsedTime = 0;
         Vector3 currentPos = transform.position;
         block.SetFloat("_Dissolve", 0f);
-        //anim.SetBool("moving", true);
         while (elapsedTime < halfTime) {
             //Dissolve
             block.SetFloat("_Dissolve", elapsedTime / halfTime);
@@ -116,6 +115,7 @@ public class Piece : MonoBehaviour
 
         // Make sure we got there
         transform.position = destination;
+        onComplete();
         //anim.SetBool("moving", false);
         yield return null;
     }

@@ -34,8 +34,14 @@ public class Board : MonoBehaviour
     private bool canSelect = true;
     public Material glowMaterial;
 
+    private Action<BoardAction> _onBoardUpdate;
+
     void Awake()
     {
+    }
+
+    public void Setup(Action<BoardAction> onBoardUpdate) {
+        _onBoardUpdate = onBoardUpdate;
     }
 
     // Start is called before the first frame update
@@ -55,6 +61,9 @@ public class Board : MonoBehaviour
                 pieces[i * 8 + j] = piece;
             }
         }
+        BoardAction boardAction = new BoardAction();
+        boardAction.nextPlayer = playerTurn == Piece.PlayerTypes.BLACK ? Piece.PlayerTypes.BLACK : Piece.PlayerTypes.WHITE;
+        _onBoardUpdate?.Invoke(boardAction);
     }
 
     void TakeTile(Tile player, Tile opponent) {
@@ -70,15 +79,18 @@ public class Board : MonoBehaviour
             }
         }
 
-        StartCoroutine(Sonar(3f, -1f, opponent.transform.position, 1f, () => {
-            foreach (Tile t2 in tiles) {
-                if (t2.TileMode != Tile.TileModes.DEFAULT)
-                    t2.SetHighlighted(Tile.TileModes.DEFAULT);
-            }
-        }));
-
         player.Piece = null;
         opponent.Piece = playerPiece;
+        canSelect = false;
+        playerPiece.Move(opponent.transform.position, .5f, () => {
+            StartCoroutine(Sonar(2f, -.1f, opponent.transform.position, .5f, () => {
+                foreach (Tile t2 in tiles) {
+                    if (t2.TileMode != Tile.TileModes.DEFAULT)
+                        t2.SetHighlighted(Tile.TileModes.DEFAULT);
+                }
+                canSelect = true;
+            }));
+        });
         //playerPiece.SetState(Piece.SelectedStates.SELECTED);
         playerPiece.MoveNumber++;
         selectedTile = null;
@@ -91,6 +103,10 @@ public class Board : MonoBehaviour
         } else {
             playerTurn = Piece.PlayerTypes.WHITE;
         }
+
+        BoardAction boardAction = new BoardAction();
+        boardAction.nextPlayer = playerTurn == Piece.PlayerTypes.BLACK ? Piece.PlayerTypes.BLACK : Piece.PlayerTypes.WHITE;
+        _onBoardUpdate?.Invoke(boardAction);
     }
 
     // Update is called once per frame
@@ -133,7 +149,7 @@ public class Board : MonoBehaviour
 
                 selectedTile = tile;
                 canSelect = false;
-                StartCoroutine(Sonar(0.05f, 2f, tile.transform.position, 1f, () => { canSelect = true; }));
+                StartCoroutine(Sonar(.0f, 2f, tile.transform.position, .5f, () => { canSelect = true; }));
                 int[] tileStates = selectedTile.Piece.GetAvailableTiles(tiles);
                 for (int i = 0; i < tileStates.Length; i++) {
                     switch (tileStates[i]) {
@@ -151,20 +167,22 @@ public class Board : MonoBehaviour
                 tile.SetHighlighted(Tile.TileModes.SELECTED);
             }
             else {
-                StartCoroutine(Sonar(2f, 0f, tile.transform.position, 1f, () => {
-                    foreach (Tile t2 in tiles) {
-                        t2.SetHighlighted(Tile.TileModes.DEFAULT);
-                    }
-                }));
-                //Play sonar inverse shader
-                selectedTile = null;
+                if(selectedTile) {
+                    StartCoroutine(Sonar(2f, -.1f, selectedTile.transform.position, .5f, () => {
+                        foreach (Tile t2 in tiles) {
+                            t2.SetHighlighted(Tile.TileModes.DEFAULT);
+                        }
+                    }));
+                    //Play sonar inverse shader
+                    selectedTile = null;
+                }
             }
         }
         else {
             //Play sonar inverse shader
             if (!selectedTile)
                 return;
-            StartCoroutine(Sonar(2f, 0f, selectedTile.transform.position, 1f, () => {
+            StartCoroutine(Sonar(2f, -.1f, selectedTile.transform.position, .5f, () => {
                 foreach (Tile t2 in tiles) {
                     t2.SetHighlighted(Tile.TileModes.DEFAULT);
                 }
@@ -248,4 +266,50 @@ public class Board : MonoBehaviour
         piece.pieceType = pieceType;
         return piece;
     }
+
+    public BoardState GetState() {
+        BoardState _boardState = new BoardState();
+        for(int i = 0; i < 64; i++) {
+            PieceState pieceState = new PieceState();
+
+            Tile t = tiles[i];
+            if(t.piece) {
+                switch(t.piece.pieceType) {
+                    case Piece.PieceTypes.PAWN:
+                        pieceState.pieceType = Piece.PieceTypes.PAWN;
+                        break;
+                    case Piece.PieceTypes.BISHOP:
+                        pieceState.pieceType = Piece.PieceTypes.BISHOP;
+                        break;
+                    case Piece.PieceTypes.KNIGHT:
+                        pieceState.pieceType = Piece.PieceTypes.KNIGHT;
+                        break;
+                    case Piece.PieceTypes.QUEEN:
+                        pieceState.pieceType = Piece.PieceTypes.QUEEN;
+                        break;
+                    case Piece.PieceTypes.KING:
+                        pieceState.pieceType = Piece.PieceTypes.KING;
+                        break;
+                    case Piece.PieceTypes.TOWER:
+                        pieceState.pieceType = Piece.PieceTypes.TOWER;
+                        break;
+                    default:
+                        pieceState.pieceType = Piece.PieceTypes.NONE;
+                        break;
+                }
+                pieceState.playerType = t.piece.playerType == Piece.PlayerTypes.BLACK ? Piece.PlayerTypes.BLACK : Piece.PlayerTypes.WHITE;
+            }
+            else {
+                pieceState.pieceType = Piece.PieceTypes.NONE;
+            }
+
+            _boardState.SetPieceState(i, pieceState);
+        }
+
+        return _boardState;
+    }
+}
+
+public struct BoardAction {
+    public Piece.PlayerTypes nextPlayer;
 }

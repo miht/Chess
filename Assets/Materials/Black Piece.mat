@@ -69,6 +69,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - Boolean_DEA0E8E7: 1
     - Vector1_697F5613: 1
     - _BlendOp: 0
     - _BumpScale: 1
@@ -89,12 +90,13 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _IsActive: 1
     - _LightingEnabled: 0
     - _Metallic: 0
     - _Mode: 2
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Radius: -1
+    - _Radius: -0.1
     - _SmoothnessTextureChannel: 0
     - _SoftParticlesEnabled: 0
     - _SoftParticlesFarFadeDistance: 1
@@ -103,10 +105,11 @@ Material:
     - _SrcBlend: 5
     - _UVSec: 0
     - _ZWrite: 0
+    - _isActive: 1
     m_Colors:
     - Color_4F99439: {r: 0, g: 0, b: 0, a: 0}
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
-    - _Center: {r: 0.70119995, g: -0.17, b: 0.34100002, a: 0}
+    - _Center: {r: 0.10120002, g: -0.17, b: 0.14100003, a: 0}
     - _Color: {r: 0, g: 0, b: 0, a: 0}
     - _ColorAddSubDiff: {r: -1, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 5.992157, g: 2.0705884, b: 1.3490196, a: 1}

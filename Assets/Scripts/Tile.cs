@@ -42,26 +42,6 @@ public class Tile : MonoBehaviour
         }
     }
 
-    void OnMouseOver() {
-        //if (tileMode != TileModes.SELECTED || tileMode != TileModes.TAKEABLE || tileMode != TileModes.HOSTILE) {
-        //    SetHighlighted(TileModes.HOVERING);
-        //}
-    }
-
-    private void OnMouseExit() {
-        //if(tileMode == TileModes.HOSTILE || prevTileMode == TileModes.HOSTILE) {
-        //    return;
-        //}
-        //if(tileMode == TileModes.TAKEABLE || prevTileMode == TileModes.TAKEABLE) {
-        //    return;
-        //}
-        //if (tileMode == TileModes.SELECTED || prevTileMode == TileModes.SELECTED) {
-        //    return;
-        //}
-
-        //SetHighlighted(TileModes.DEFAULT);
-    }
-
     protected int CalculateIndex() {
         return transform.parent.GetSiblingIndex();
     }
@@ -72,7 +52,6 @@ public class Tile : MonoBehaviour
             piece = value;
             if (piece == null) return;
             piece.transform.parent = transform;
-            piece.Move(transform.position, .5f);
         }
     }
 
@@ -107,6 +86,7 @@ public class Tile : MonoBehaviour
                 break;
         }
 
+        block.SetFloat("_IsActive", tileMode == TileModes.DEFAULT ? 0f: 1f);
         glowMeshRenderer.SetPropertyBlock(block);
         //particleSystemRenderer.SetPropertyBlock(particleBlock);
         //glowMeshRenderer.enabled = tileMode != TileModes.DEFAULT;
